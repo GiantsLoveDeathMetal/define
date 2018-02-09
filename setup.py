@@ -11,6 +11,12 @@ setup(
         include='define',
         exclude='tests',
     ),
+    entry_points={
+        'console_scripts': ['define=define.cli:main'],
+    },
+    install_requires=[
+        'requests',
+    ],
     classifiers=[
         "Environment :: Console",
         "Operation System :: OS Independent",
