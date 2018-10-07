@@ -15,11 +15,18 @@ func main() {
 	app.Usage = "Define a word in the command line!"
 	app.Action = func(c *cli.Context) error {
 		word := c.Args().Get(0)
-		definition := request.Define(word)
-		fmt.Println(definition)
+		definition, err := request.Define(word)
+		if err != nil {
+			correction := request.ReadCorrection("mock_correction")
+			fmt.Println(correction.Suggestion)
+			definition, _ := request.ReadDefinition("mock_definition")
+			fmt.Println(definition.Subsenses)
+		}
+		for _, s := range definition.Subsenses {
+			fmt.Println(s)
+		}
 
-		correction := request.Correct(word)
-		fmt.Println(correction)
+		// correction := request.Correct(word)
 		return nil
 	}
 

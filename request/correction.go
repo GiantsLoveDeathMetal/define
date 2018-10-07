@@ -1,13 +1,18 @@
 package request
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 )
 
-func Correct(w string) string {
+type Correction struct {
+	Suggestion string `json:"suggestion"`
+}
+
+func Correct(w string) Correction {
 	var URL string = "https://montanaflynn-spellcheck.p.mashape.com/check/?text=%v"
 
 	client := &http.Client{}
@@ -23,5 +28,14 @@ func Correct(w string) string {
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	return string(body)
+	return parseCorrection(body)
+}
+
+func parseCorrection(d []byte) Correction {
+	var def Correction
+	err := json.Unmarshal(d, &def)
+	if err != nil {
+		panic(err)
+	}
+	return def
 }

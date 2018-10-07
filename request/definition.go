@@ -1,15 +1,41 @@
 package request
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 )
 
+type Definition struct {
+	Results []Result `json:"results"`
+}
+
+type Result struct {
+	LexicalEntries []LexicalEntry `json:"lexicalEntries"`
+}
+
+type LexicalEntry struct {
+	Entries []Entry `json:"entries"`
+}
+
+type Entry struct {
+	Senses []Sense `json:"senses"`
+}
+
+type Sense struct {
+	Subsenses []Subsense `json:"subsenses"`
+}
+
+type Subsense struct {
+	Shortdefinitions []string `json:"short_definitions"`
+	Domains          []string `json:"domains"`
+}
+
 var LANGUAGE string = "en"
 
-func Define(w string) string {
+func Define(w string) (*Sense, error) {
 	var URL string = "https://od-api.oxforddictionaries.com:443/api/v1/entries/%v/%v"
 
 	client := &http.Client{}
@@ -26,5 +52,15 @@ func Define(w string) string {
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	return string(body)
+
+	return parseDefinition(body)
+}
+
+func parseDefinition(d []byte) (*Sense, error) {
+	var def Definition
+	err := json.Unmarshal(d, &def)
+	if err != nil {
+		return nil, err
+	}
+	return &def.Results[0].LexicalEntries[0].Entries[0].Senses[0], nil
 }
